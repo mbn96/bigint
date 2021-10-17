@@ -93,9 +93,9 @@ namespace MBN
         return (bytes_count << 3) + msb;
     }
 
-    m_bytes &Bigint::internal_add(const m_bytes &a, const m_bytes &b, m_bytes &res)
+    void Bigint::internal_add(m_bytes &res, const m_bytes &b) const
     {
-        size_t a_len = a.getSize();
+        size_t a_len = res.getSize();
         size_t b_len = b.getSize();
         size_t bigger_len = a_len > b_len ? a_len : b_len;
 
@@ -107,14 +107,14 @@ namespace MBN
             temp_16 += temp_8;
             if (i < a_len)
             {
-                temp_16 += a[i];
+                temp_16 += res[i];
             }
             if (i < b_len)
             {
                 temp_16 += b[i];
             }
 
-            res.append(temp_16 & 0xffu);
+            res[i] = temp_16 & 0xffu;
             temp_8 = temp_16 >> 8;
         }
 
@@ -122,10 +122,43 @@ namespace MBN
         {
             res.append(ONE_U);
         }
-        return res;
     }
 
-    m_bytes &Bigint::internal_left_shift(m_bytes &res, uint64_t shift)
+#pragma region // Comment-out
+    // m_bytes &Bigint::internal_add(const m_bytes &a, const m_bytes &b, m_bytes &res) const
+    // {
+    //     size_t a_len = a.getSize();
+    //     size_t b_len = b.getSize();
+    //     size_t bigger_len = a_len > b_len ? a_len : b_len;
+
+    //     uint16_t temp_16 = 0;
+    //     uint8_t temp_8 = 0;
+
+    //     for (size_t i = 0; i < bigger_len; i++)
+    //     {
+    //         temp_16 += temp_8;
+    //         if (i < a_len)
+    //         {
+    //             temp_16 += a[i];
+    //         }
+    //         if (i < b_len)
+    //         {
+    //             temp_16 += b[i];
+    //         }
+
+    //         res.append(temp_16 & 0xffu);
+    //         temp_8 = temp_16 >> 8;
+    //     }
+
+    //     if (temp_8)
+    //     {
+    //         res.append(ONE_U);
+    //     }
+    //     return res;
+    // }
+#pragma endregion
+
+    void Bigint::internal_left_shift(m_bytes &res, uint64_t shift) const
     {
         if (shift > 8)
         {
@@ -152,8 +185,6 @@ namespace MBN
                 res.append(temp_8);
             }
         }
-
-        return res;
     }
 
     bool Bigint::operator>(const Bigint &other) const

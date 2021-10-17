@@ -24,15 +24,15 @@ namespace MBN
 
         size_t get_msb() const;
 
-        m_bytes &internal_add(const m_bytes &a, const m_bytes &b, m_bytes &res);
-        m_bytes &internal_sub(const m_bytes &a, const m_bytes &b, m_bytes &res);
-        m_bytes &internal_add_sub(const Bigint &a, const Bigint &b, m_bytes &res, uint8_t &sign);
+        void internal_add(m_bytes &res, const m_bytes &b) const;
+        void internal_sub(m_bytes &res, const m_bytes &b) const;
+        void internal_add_sub(m_bytes &res, const Bigint &b, uint8_t &sign) const;
 
-        m_bytes &internal_left_shift(m_bytes &res, uint64_t shift);
-        m_bytes &internal_right_shift(m_bytes &res, uint64_t shift);
+        void internal_left_shift(m_bytes &res, uint64_t shift) const;
+        void internal_right_shift(m_bytes &res, uint64_t shift) const;
 
-        m_bytes &internal_multi(const m_bytes &a, const m_bytes &b, m_bytes &res);
-        m_bytes &internal_div(const m_bytes &a, const m_bytes &b, m_bytes &res);
+        void internal_multi(m_bytes &res, const m_bytes &b) const;
+        void internal_div(m_bytes &res, const m_bytes &b) const;
 
     public:
         Bigint(std::int64_t num);
