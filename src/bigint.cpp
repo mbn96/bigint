@@ -207,7 +207,7 @@ namespace MBN
         {
             uint32_t temp_32 = 0;
             uint16_t temp_16 = 0;
-            uint8_t temp_8 = 0;
+            // uint8_t temp_8 = 0;
 
             size_t res_len = res.getSize();
 
@@ -218,6 +218,15 @@ namespace MBN
                 temp_32 += temp_16;
                 res[i] = temp_32 & _8_bit;
                 temp_16 = temp_32 >> 8;
+            }
+
+            if (temp_16)
+            {
+                res.append(temp_16 & _8_bit);
+                if (temp_16 & 0xff00u)
+                {
+                    res.append(temp_16 >> 8);
+                }
             }
         }
         else
