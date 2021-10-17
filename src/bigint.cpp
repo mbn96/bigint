@@ -10,6 +10,25 @@ namespace MBN
 
     // static Bigint ONE_BIG(0, 0);
 
+    static void trim_bytes(m_bytes &bs)
+    {
+        size_t len = bs.getSize();
+        if (len > 1)
+        {
+            for (int i = len - 1; i > 0; i--)
+            {
+                if (bs[i])
+                {
+                    break;
+                }
+                else
+                {
+                    bs.removeAt(i);
+                }
+            }
+        }
+    }
+
     int Bigint::compare(const Bigint &other) const
     {
         if (sign == other.sign)
@@ -143,8 +162,40 @@ namespace MBN
         }
     }
 
+    // always assumes res > b.
     void Bigint::internal_sub(m_bytes &res, const m_bytes &b) const
     {
+        size_t a_len = res.getSize();
+        size_t b_len = b.getSize();
+
+        uint16_t temp_16 = 0;
+        uint8_t temp_8, next_carry = 0, curr_carry = 0;
+
+        for (size_t i = 0; i < a_len; i++)
+        {
+            curr_carry = next_carry;
+            next_carry = 0;
+            temp_16 = res[i];
+            if (curr_carry > temp_16)
+            {
+                temp_16 += 0x100u;
+                next_carry++;
+            }
+            temp_16 -= curr_carry;
+
+            if (i < b_len)
+            {
+                temp_8 = b[i];
+                if (temp_8 > temp_16)
+                {
+                    temp_16 += 0x100u;
+                    next_carry++;
+                }
+                temp_16 -= temp_8;
+            }
+            res[i] = temp_16;
+        }
+        trim_bytes(res);
     }
 
     m_bytes Bigint::internal_add_sub(const Bigint &b, uint8_t b_sign, uint8_t &res_sign) const
@@ -233,7 +284,7 @@ namespace MBN
         {
             throw std::invalid_argument("internal_left_shift been called with shift value greater than 8.");
         }
-        if (shift)
+        else if (shift)
         {
             uint16_t temp_16 = 0;
             uint8_t curr_byte, temp_8 = 0;
@@ -253,6 +304,32 @@ namespace MBN
             {
                 res.append(temp_8);
             }
+        }
+    }
+
+    void Bigint::internal_right_shift(m_bytes &res, uint64_t shift) const
+    {
+        if (shift > 8)
+        {
+            throw std::invalid_argument("internal_left_shift been called with shift value greater than 8.");
+        }
+        else if (shift)
+        {
+            uint16_t temp_16 = 0;
+            uint8_t curr_byte, temp_8 = 0;
+            size_t len = res.getSize();
+            shift = 8 - shift;
+
+            for (std::int64_t i = len - 1; i >= 0; i--)
+            {
+                temp_16 = res[i];
+                temp_16 = temp_16 << shift;
+                curr_byte = (temp_16 & 0xff00u) >> 8;
+                curr_byte = curr_byte | temp_8;
+                res[i] = curr_byte;
+                temp_8 = temp_16 & 0xffu;
+            }
+            trim_bytes(res);
         }
     }
 
@@ -416,7 +493,7 @@ namespace MBN
 
     std::ostream &operator<<(std::ostream &strm, const Bigint &num)
     {
-        strm << num.bytes;
+        strm << (num.sign ? " - " : "") << num.bytes;
         return strm;
     }
 

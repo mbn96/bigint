@@ -18,15 +18,19 @@ using MBN::Bigint;
 
 int main(int argc, char const *argv[])
 {
-    Bigint a(45, false);
-    Bigint b(14, 0);
+    Bigint a(450, false);
+    Bigint b(140, 0);
     Bigint c = a + b;
     Bigint d = a * b;
+    Bigint e = a - b;
+    Bigint f = b - a;
 
     cout << a << endl;
     cout << b << endl;
     cout << c << endl;
     cout << d << endl;
+    cout << e << endl;
+    cout << f << endl;
 
     cout << (a > b) << endl;
 
