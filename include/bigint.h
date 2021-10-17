@@ -22,7 +22,9 @@ namespace MBN
         int compare(const Bigint &other) const;
         int compare_unsigned(const Bigint &other) const;
 
-        size_t get_msb() const;
+        bool is_zero(const m_bytes &bs) const;
+
+        size_t get_msb(const m_bytes &bs) const;
 
         void internal_add(m_bytes &res, const m_bytes &b) const;
         void internal_sub(m_bytes &res, const m_bytes &b) const;
@@ -32,6 +34,7 @@ namespace MBN
         void internal_right_shift(m_bytes &res, uint64_t shift) const;
 
         void internal_multi(m_bytes &res, const m_bytes &b) const;
+        void internal_multi(m_bytes &res, uint8_t b) const;
         void internal_div(m_bytes &res, const m_bytes &b) const;
 
     public:
@@ -45,6 +48,8 @@ namespace MBN
 
         friend void swap(Bigint &self, Bigint &other);
         friend std::ostream &operator<<(std::ostream &strm, const Bigint &num);
+
+        size_t get_msb() const;
 
         Bigint &operator=(Bigint other);
 

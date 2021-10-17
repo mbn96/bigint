@@ -2,10 +2,14 @@
 #include "bigint.h"
 
 #define ONE_U 0x1u
-#define TEN_u 0x1010u
+#define TEN_U 0xau
+#define _8_bit 0xffu
 
 namespace MBN
 {
+
+    static Bigint ONE_BIG(0, 0);
+
     int Bigint::compare(const Bigint &other) const
     {
         if (sign == other.sign)
@@ -78,10 +82,15 @@ namespace MBN
         }
     }
 
-    size_t Bigint::get_msb() const
+    bool Bigint::is_zero(const m_bytes &bs) const
     {
-        size_t bytes_count = bytes.getSize() - 1;
-        uint8_t lastByte = bytes[bytes_count];
+        return (bs.getSize() == 1) && (bs[0] == 0);
+    }
+
+    size_t Bigint::get_msb(const m_bytes &bs) const
+    {
+        size_t bytes_count = bs.getSize() - 1;
+        uint8_t lastByte = bs[bytes_count];
         uint8_t msb = 7;
         for (; msb >= 0; msb--)
         {
@@ -91,6 +100,11 @@ namespace MBN
             }
         }
         return (bytes_count << 3) + msb;
+    }
+
+    size_t Bigint::get_msb() const
+    {
+        return get_msb(bytes);
     }
 
     void Bigint::internal_add(m_bytes &res, const m_bytes &b) const
@@ -104,7 +118,7 @@ namespace MBN
 
         for (size_t i = 0; i < bigger_len; i++)
         {
-            temp_16 += temp_8;
+            temp_16 = temp_8;
             if (i < a_len)
             {
                 temp_16 += res[i];
@@ -114,7 +128,7 @@ namespace MBN
                 temp_16 += b[i];
             }
 
-            res[i] = temp_16 & 0xffu;
+            res[i] = temp_16 & _8_bit;
             temp_8 = temp_16 >> 8;
         }
 
@@ -174,7 +188,7 @@ namespace MBN
             {
                 temp_16 = res[i];
                 temp_16 = temp_16 << shift;
-                curr_byte = temp_16 & 0xffu;
+                curr_byte = temp_16 & _8_bit;
                 curr_byte = curr_byte | temp_8;
                 res[i] = curr_byte;
                 temp_8 = temp_16 >> 8;
@@ -184,6 +198,48 @@ namespace MBN
             {
                 res.append(temp_8);
             }
+        }
+    }
+
+    void Bigint::internal_multi(m_bytes &res, uint8_t b) const
+    {
+        if (b)
+        {
+            uint32_t temp_32 = 0;
+            uint16_t temp_16 = 0;
+            uint8_t temp_8 = 0;
+
+            size_t res_len = res.getSize();
+
+            for (size_t i = 0; i < res_len; i++)
+            {
+                temp_32 = res[i];
+                temp_32 *= b;
+                temp_32 += temp_16;
+                res[i] = temp_32 & _8_bit;
+                temp_16 = temp_32 >> 8;
+            }
+        }
+        else
+        {
+            m_bytes temp(1);
+            temp[0] = 0;
+            res = temp;
+        }
+    }
+
+    void Bigint::internal_multi(m_bytes &res, const m_bytes &b) const
+    {
+        if (!(is_zero(res) || is_zero(b)))
+        {
+            m_bytes a(res);
+            size_t msb_b = get_msb(b);
+        }
+        else
+        {
+            m_bytes temp(1);
+            temp[0] = 0;
+            res = temp;
         }
     }
 
