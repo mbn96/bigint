@@ -18,13 +18,17 @@ using MBN::Bigint;
 
 int main(int argc, char const *argv[])
 {
-    Bigint a(45511515, false);
-    Bigint b(1958442, 0);
+    Bigint a(45, false);
+    Bigint b(12, 0);
     Bigint c = a + b;
+    Bigint d = a * b;
 
     cout << a << endl;
     cout << b << endl;
     cout << c << endl;
+    cout << d << endl;
+
+    cout << (a > b) << endl;
 
     // auto list = get_ints();
 

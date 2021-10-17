@@ -375,6 +375,13 @@ namespace MBN
         return Bigint(res, res_sign);
     }
 
+    Bigint Bigint::operator*(const Bigint &other) const
+    {
+        m_bytes res(bytes);
+        internal_multi(res, other.bytes);
+        return Bigint(res, sign == other.sign ? 0 : 1);
+    }
+
     bool Bigint::operator>(const Bigint &other) const
     {
         return compare(other) == -1;
