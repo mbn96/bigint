@@ -8,7 +8,7 @@
 namespace MBN
 {
 
-    static Bigint ONE_BIG(0, 0);
+    // static Bigint ONE_BIG(0, 0);
 
     int Bigint::compare(const Bigint &other) const
     {
@@ -140,6 +140,56 @@ namespace MBN
         if (temp_8)
         {
             res.append(ONE_U);
+        }
+    }
+
+    void Bigint::internal_sub(m_bytes &res, const m_bytes &b) const
+    {
+    }
+
+    m_bytes Bigint::internal_add_sub(const Bigint &b, uint8_t b_sign, uint8_t &res_sign) const
+    {
+        m_bytes res;
+        if (sign == b_sign)
+        {
+            // m_bytes res(this->bytes);
+            // std::cout << "Here in before copy.\n";
+            res = this->bytes;
+            // std::cout << "Here in after copy.\n";
+            res_sign = sign;
+            internal_add(res, b.bytes);
+            return res;
+        }
+        else
+        {
+            int comp_u = compare_unsigned(b);
+            if (comp_u)
+            {
+                if (comp_u == 1)
+                {
+                    // m_bytes res(b.bytes);
+                    res = b.bytes;
+                    res_sign = b_sign;
+                    internal_sub(res, this->bytes);
+                    return res;
+                }
+                else
+                {
+                    // m_bytes res(this->bytes);
+                    res = this->bytes;
+                    res_sign = sign;
+                    internal_sub(res, b.bytes);
+                    return res;
+                }
+            }
+            else
+            {
+                // m_bytes res(1);
+                res.clear();
+                res.append(0);
+                res_sign = 0;
+                return res;
+            }
         }
     }
 
@@ -277,6 +327,54 @@ namespace MBN
         }
     }
 
+    static size_t get_ms_byte(uint64_t num)
+    {
+        uint64_t temp = 0xffu;
+        using std::printf;
+        for (int i = 7; i > 0; i--)
+        {
+            if (num & (temp << (i * 8)))
+            {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    Bigint::Bigint(uint64_t num, bool sign) : sign(sign)
+    {
+        // using std::cout;
+        // using std::endl;
+        // using std::printf;
+
+        auto ms_byte = get_ms_byte(num);
+        // cout << "this is msb: " << ms_byte << endl;
+        // printf("this is num: %lx\n", num);
+        for (size_t i = 0; i <= ms_byte; i++)
+        {
+            bytes.append((num >> (i * 8)) & _8_bit_mask);
+        }
+    }
+
+    Bigint::Bigint(const m_bytes &bs, uint8_t sign) : bytes(bs), sign(sign) {}
+
+    Bigint::~Bigint() {}
+
+    Bigint Bigint::operator+(const Bigint &other) const
+    {
+        uint8_t res_sign;
+        m_bytes res = internal_add_sub(other, other.sign, res_sign);
+        // std::cout << "Here in after return.\n";
+        return Bigint(res, res_sign);
+    }
+
+    Bigint Bigint::operator-(const Bigint &other) const
+    {
+        uint8_t res_sign;
+        auto res = internal_add_sub(other, other.sign ? 0 : 1, res_sign);
+        return Bigint(res, res_sign);
+    }
+
     bool Bigint::operator>(const Bigint &other) const
     {
         return compare(other) == -1;
@@ -307,6 +405,12 @@ namespace MBN
     {
         int comp = compare(other);
         return comp >= 0;
+    }
+
+    std::ostream &operator<<(std::ostream &strm, const Bigint &num)
+    {
+        strm << num.bytes;
+        return strm;
     }
 
 }

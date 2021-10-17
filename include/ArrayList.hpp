@@ -65,12 +65,15 @@ namespace MBN
 
         ArrayList(const ArrayList<T> &other) : size(other.size), arr_len(other.arr_len)
         {
+            // std::cout << "Here in deep copy.\n";
             arr = new T[arr_len];
             std::copy(other.arr, other.arr + size, this->arr);
         }
 
         ArrayList(ArrayList<T> &&other)
         {
+            // std::cout << "Here in shallow copy.\n";
+
             swap(*this, other);
         }
 
@@ -97,6 +100,8 @@ namespace MBN
 
         ArrayList<T> &operator=(ArrayList<T> other)
         {
+            // std::cout << "Here in =op.\n";
+
             swap(*this, other);
             return *this;
         }
@@ -211,6 +216,8 @@ namespace MBN
         using std::swap;
 
         // std::cout << "Here in custom swap.\n";
+        // std::cout << self << std::endl;
+        // std::cout << other << std::endl;
 
         swap(self.size, other.size);
         swap(self.arr_len, other.arr_len);
@@ -220,12 +227,20 @@ namespace MBN
     template <typename T>
     std::ostream &operator<<(std::ostream &strm, const ArrayList<T> &list)
     {
-        strm << '[';
-        for (size_t i = 0; i < list.size - 1; i++)
+        if (list.size)
         {
-            strm << " " << list.arr[i] << ',';
+            strm << '[';
+            for (size_t i = 0; i < list.size - 1; i++)
+            {
+                strm << " " << (int)list.arr[i] << ',';
+            }
+            strm << " " << (int)list.arr[list.size - 1] << ']';
         }
-        strm << " " << list.arr[list.size - 1] << ']';
+        else
+        {
+            strm << "[]";
+        }
+
         return strm;
     }
 

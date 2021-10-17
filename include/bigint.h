@@ -28,7 +28,7 @@ namespace MBN
 
         void internal_add(m_bytes &res, const m_bytes &b) const;
         void internal_sub(m_bytes &res, const m_bytes &b) const;
-        void internal_add_sub(m_bytes &res, const Bigint &b, uint8_t &sign) const;
+        m_bytes internal_add_sub(const Bigint &b, uint8_t b_sign, uint8_t &res_sign) const;
 
         void internal_left_shift(m_bytes &res, uint64_t shift) const;
         void internal_right_shift(m_bytes &res, uint64_t shift) const;
@@ -37,9 +37,11 @@ namespace MBN
         void internal_multi(m_bytes &res, uint8_t b) const;
         void internal_div(m_bytes &res, const m_bytes &b) const;
 
+        Bigint(const m_bytes &bs, uint8_t sign);
+
     public:
         Bigint(std::int64_t num);
-        Bigint(std::uint64_t num, uint8_t sign);
+        Bigint(uint64_t num, bool sign);
         Bigint(const std::string &num);
         Bigint(const char *num);
         Bigint(const Bigint &other);
