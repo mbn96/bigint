@@ -123,6 +123,11 @@ namespace MBN
             {
                 temp_16 += res[i];
             }
+            else
+            {
+                res.append(0);
+            }
+
             if (i < b_len)
             {
                 temp_16 += b[i];
@@ -231,9 +236,8 @@ namespace MBN
         }
         else
         {
-            m_bytes temp(1);
-            temp[0] = 0;
-            res = temp;
+            res.clear();
+            res.append(0);
         }
     }
 
@@ -242,13 +246,34 @@ namespace MBN
         if (!(is_zero(res) || is_zero(b)))
         {
             m_bytes a(res);
-            size_t msb_b = get_msb(b);
+            size_t b_len = b.getSize() - 1;
+            res.clear();
+
+            // // taking care of the first byte:
+            // internal_multi(res, b[b_len]);
+            // internal_left_shift(res, 8);
+
+            // iterate bytes:
+            for (size_t i = b_len; i > 0; i--)
+            {
+                if (b[i])
+                {
+                    m_bytes temp(a);
+                    internal_multi(temp, b[i]);
+                    internal_add(res, temp);
+                }
+                internal_left_shift(res, 8);
+            }
+            if (b[0])
+            {
+                internal_multi(a, b[0]);
+                internal_add(res, a);
+            }
         }
         else
         {
-            m_bytes temp(1);
-            temp[0] = 0;
-            res = temp;
+            res.clear();
+            res.append(0);
         }
     }
 

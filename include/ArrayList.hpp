@@ -187,6 +187,14 @@ namespace MBN
             return r_out;
         }
 
+        void clear()
+        {
+            delete[] arr;
+            size = 0;
+            arr_len = 4;
+            arr = new T[arr_len];
+        }
+
         template <typename A>
         friend class MBN::ArrListIterator;
 
