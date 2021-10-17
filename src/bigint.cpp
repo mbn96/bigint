@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "bigint.h"
 
 #define ONE_U 0x1u
@@ -121,6 +122,37 @@ namespace MBN
         {
             res.append(ONE_U);
         }
+        return res;
+    }
+
+    m_bytes &Bigint::internal_left_shift(m_bytes &res, uint64_t shift)
+    {
+        if (shift > 8)
+        {
+            throw std::invalid_argument("internal_left_shift been called with shift value greater than 8.");
+        }
+        if (shift)
+        {
+            uint16_t temp_16 = 0;
+            uint8_t curr_byte, temp_8 = 0;
+            size_t len = res.getSize();
+
+            for (size_t i = 0; i < len; i++)
+            {
+                temp_16 = res[i];
+                temp_16 = temp_16 << shift;
+                curr_byte = temp_16 & 0xffu;
+                curr_byte = curr_byte | temp_8;
+                res[i] = curr_byte;
+                temp_8 = temp_16 >> 8;
+            }
+
+            if (temp_8)
+            {
+                res.append(temp_8);
+            }
+        }
+
         return res;
     }
 
