@@ -3,7 +3,7 @@
 
 #define ONE_U 0x1u
 #define TEN_U 0xau
-#define _8_bit 0xffu
+#define _8_bit_mask 0xffu
 
 namespace MBN
 {
@@ -128,7 +128,7 @@ namespace MBN
                 temp_16 += b[i];
             }
 
-            res[i] = temp_16 & _8_bit;
+            res[i] = temp_16 & _8_bit_mask;
             temp_8 = temp_16 >> 8;
         }
 
@@ -188,7 +188,7 @@ namespace MBN
             {
                 temp_16 = res[i];
                 temp_16 = temp_16 << shift;
-                curr_byte = temp_16 & _8_bit;
+                curr_byte = temp_16 & _8_bit_mask;
                 curr_byte = curr_byte | temp_8;
                 res[i] = curr_byte;
                 temp_8 = temp_16 >> 8;
@@ -216,13 +216,13 @@ namespace MBN
                 temp_32 = res[i];
                 temp_32 *= b;
                 temp_32 += temp_16;
-                res[i] = temp_32 & _8_bit;
+                res[i] = temp_32 & _8_bit_mask;
                 temp_16 = temp_32 >> 8;
             }
 
             if (temp_16)
             {
-                res.append(temp_16 & _8_bit);
+                res.append(temp_16 & _8_bit_mask);
                 if (temp_16 & 0xff00u)
                 {
                     res.append(temp_16 >> 8);
