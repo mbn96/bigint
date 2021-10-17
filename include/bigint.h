@@ -22,21 +22,26 @@ namespace MBN
         int compare(const Bigint &other) const;
         int compare_unsigned(const Bigint &other) const;
 
-        size_t get_msb() const;
+        bool is_zero(const m_bytes &bs) const;
 
-        m_bytes &internal_add(const m_bytes &a, const m_bytes &b, m_bytes &res);
-        m_bytes &internal_sub(const m_bytes &a, const m_bytes &b, m_bytes &res);
-        m_bytes &internal_add_sub(const Bigint &a, const Bigint &b, m_bytes &res, uint8_t &sign);
+        size_t get_msb(const m_bytes &bs) const;
 
-        m_bytes &internal_left_shift(m_bytes &res, uint64_t shift);
-        m_bytes &internal_right_shift(m_bytes &res, uint64_t shift);
+        void internal_add(m_bytes &res, const m_bytes &b) const;
+        void internal_sub(m_bytes &res, const m_bytes &b) const;
+        m_bytes internal_add_sub(const Bigint &b, uint8_t b_sign, uint8_t &res_sign) const;
 
-        m_bytes &internal_multi(const m_bytes &a, const m_bytes &b, m_bytes &res);
-        m_bytes &internal_div(const m_bytes &a, const m_bytes &b, m_bytes &res);
+        void internal_left_shift(m_bytes &res, uint64_t shift) const;
+        void internal_right_shift(m_bytes &res, uint64_t shift) const;
+
+        void internal_multi(m_bytes &res, const m_bytes &b) const;
+        void internal_multi(m_bytes &res, uint8_t b) const;
+        void internal_div(m_bytes &res, const m_bytes &b) const;
+
+        Bigint(const m_bytes &bs, uint8_t sign);
 
     public:
         Bigint(std::int64_t num);
-        Bigint(std::uint64_t num, uint8_t sign);
+        Bigint(uint64_t num, bool sign);
         Bigint(const std::string &num);
         Bigint(const char *num);
         Bigint(const Bigint &other);
@@ -45,6 +50,8 @@ namespace MBN
 
         friend void swap(Bigint &self, Bigint &other);
         friend std::ostream &operator<<(std::ostream &strm, const Bigint &num);
+
+        size_t get_msb() const;
 
         Bigint &operator=(Bigint other);
 
@@ -56,8 +63,8 @@ namespace MBN
         Bigint operator<<(uint64_t shift) const;
         Bigint operator>>(uint64_t shift) const;
 
-        Bigint operator&&(const Bigint &other) const;
-        Bigint operator||(const Bigint &other) const;
+        Bigint operator&(const Bigint &other) const;
+        Bigint operator|(const Bigint &other) const;
 
         bool operator>(const Bigint &other) const;
         bool operator<(const Bigint &other) const;
