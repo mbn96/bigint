@@ -56,8 +56,8 @@ namespace MBN
         Bigint operator<<(uint64_t shift) const;
         Bigint operator>>(uint64_t shift) const;
 
-        Bigint operator&&(const Bigint &other) const;
-        Bigint operator||(const Bigint &other) const;
+        Bigint operator&(const Bigint &other) const;
+        Bigint operator|(const Bigint &other) const;
 
         bool operator>(const Bigint &other) const;
         bool operator<(const Bigint &other) const;
