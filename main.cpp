@@ -19,7 +19,7 @@ using MBN::Bigint;
 int main(int argc, char const *argv[])
 {
     Bigint a(45, false);
-    Bigint b(12, 0);
+    Bigint b(14, 0);
     Bigint c = a + b;
     Bigint d = a * b;
 

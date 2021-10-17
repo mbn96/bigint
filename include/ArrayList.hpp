@@ -36,8 +36,8 @@ namespace MBN
     class ArrayList
     {
     private:
-        size_t size, arr_len;
-        T *arr;
+        size_t size = 0, arr_len = 0;
+        T *arr = nullptr;
         void grow_arr(size_t new_len)
         {
             if (arr_len > new_len)
