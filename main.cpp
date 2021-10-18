@@ -24,18 +24,19 @@ Bigint factor(Bigint num)
     {
         return one;
     }
-
-    return num * factor(num - one);
+    Bigint f = factor(num - one);
+    return num * f;
 }
 
 int main(int argc, char const *argv[])
 {
-    cout << "hey" << endl;
+    // cout << "hey" << endl;
 
     Bigint a(455, false);
     Bigint b(121, 0);
     Bigint c = a + b;
     Bigint d = a * b;
+    d = d * c * a;
     Bigint e = a - b;
     Bigint f = b - a;
     Bigint g = a / b;
@@ -50,9 +51,9 @@ int main(int argc, char const *argv[])
     cout << g << endl;
     cout << h << endl;
 
-    cout << (a > b) << endl;
+    // cout << (a > b) << endl;
 
-    Bigint fac_num(120, 0);
+    Bigint fac_num(5500, 0);
     Bigint fact(1, 0);
     fact = factor(fac_num);
 

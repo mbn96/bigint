@@ -77,6 +77,12 @@ namespace MBN
             swap(*this, other);
         }
 
+        ArrayList(size_t init_size, const T &fill_item) : size(init_size), arr_len(init_size)
+        {
+            arr = new T[arr_len];
+            std::fill(arr, arr + size, fill_item);
+        }
+
         ~ArrayList()
         {
             // std::cout << "Here in custom destructor ArrList.\n";

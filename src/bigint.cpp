@@ -382,7 +382,6 @@ namespace MBN
         size_t full_shifts = shift / 8;
         size_t partial_shift = shift % 8;
 
-        
         if (left_shift)
         {
             if (full_shifts)
@@ -509,34 +508,63 @@ namespace MBN
         }
     }
 
+    static void set_bit(m_bytes &bs, size_t bit)
+    {
+        bs[bit / 8] |= (1 << (bit % 8));
+    }
+
     void Bigint::internal_multi(m_bytes &res, const m_bytes &b) const
     {
         if (!(is_zero(res) || is_zero(b)))
         {
-            m_bytes a(res);
-            size_t b_len = b.getSize() - 1;
+            int comp_u = compare_unsigned(res, b);
+
+            m_bytes internal_b(b);
+            m_bytes internal_a(res);
+            m_bytes temp;
+
             res.clear();
+            res.append(0);
 
-            // // taking care of the first byte:
-            // internal_multi(res, b[b_len]);
-            // internal_left_shift(res, 8);
+            bool is_a_smaller = (comp_u == 1);
+            m_bytes smaller = is_a_smaller ? internal_a : internal_b;
+            static const Bigint two(2, 0);
+            static const Bigint one(1, 0);
+            comp_u = compare_unsigned(smaller, two.bytes);
 
-            // iterate bytes:
-            for (size_t i = b_len; i > 0; i--)
+            size_t msb;
+            while (compare_unsigned(smaller, two.bytes) <= 0)
             {
-                if (b[i])
+                msb = get_msb(smaller);
+                m_bytes subtractor(smaller.getSize(), 0);
+                set_bit(subtractor, msb);
+                internal_sub(smaller, subtractor);
+
+                if (is_a_smaller)
                 {
-                    m_bytes temp(a);
-                    internal_multi(temp, b[i]);
-                    internal_add(res, temp);
+                    temp = internal_b;
                 }
-                // internal_left_shift(res, 8);
-                internal_shift_helper(res, 8, true);
+                else
+                {
+                    temp = internal_a;
+                }
+
+                internal_shift_helper(temp, msb, true);
+                internal_add(res, temp);
             }
-            if (b[0])
+
+            if (compare_unsigned(smaller, one.bytes) == 0)
             {
-                internal_multi(a, b[0]);
-                internal_add(res, a);
+                if (is_a_smaller)
+                {
+                    temp = internal_b;
+                }
+                else
+                {
+                    temp = internal_a;
+                }
+
+                internal_add(res, temp);
             }
         }
         else
@@ -545,6 +573,43 @@ namespace MBN
             res.append(0);
         }
     }
+
+    // void Bigint::internal_multi(m_bytes &res, const m_bytes &b) const
+    // {
+    //     if (!(is_zero(res) || is_zero(b)))
+    //     {
+    //         m_bytes a(res);
+    //         size_t b_len = b.getSize() - 1;
+    //         res.clear();
+
+    //         // // taking care of the first byte:
+    //         // internal_multi(res, b[b_len]);
+    //         // internal_left_shift(res, 8);
+
+    //         // iterate bytes:
+    //         for (size_t i = b_len; i > 0; i--)
+    //         {
+    //             if (b[i])
+    //             {
+    //                 m_bytes temp(a);
+    //                 internal_multi(temp, b[i]);
+    //                 internal_add(res, temp);
+    //             }
+    //             // internal_left_shift(res, 8);
+    //             internal_shift_helper(res, 8, true);
+    //         }
+    //         if (b[0])
+    //         {
+    //             internal_multi(a, b[0]);
+    //             internal_add(res, a);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         res.clear();
+    //         res.append(0);
+    //     }
+    // }
 
     void Bigint::internal_div(m_bytes &rem, const m_bytes &b, m_bytes &result, bool want_result) const
     {
