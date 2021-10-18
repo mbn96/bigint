@@ -52,7 +52,7 @@ int main(int argc, char const *argv[])
 
     cout << (a > b) << endl;
 
-    Bigint fac_num(1500, 0);
+    Bigint fac_num(120, 0);
     Bigint fact(1, 0);
     fact = factor(fac_num);
 
