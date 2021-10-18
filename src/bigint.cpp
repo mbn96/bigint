@@ -160,8 +160,8 @@ namespace MBN
     {
         size_t bytes_count = bs.getSize() - 1;
         uint8_t lastByte = bs[bytes_count];
-        uint8_t msb = 7;
-        for (; msb >= 0; msb--)
+        int msb = 7;
+        for (; msb > 0; msb--)
         {
             if (lastByte & (ONE_U << msb))
             {
@@ -381,9 +381,8 @@ namespace MBN
     {
         size_t full_shifts = shift / 8;
         size_t partial_shift = shift % 8;
-        
 
-        //TODO: impelement new shift functions with Queue...
+        //TODO: implement new shift functions with Queue...
         if (left_shift)
         {
             for (size_t i = 0; i < full_shifts; i++)
@@ -547,8 +546,15 @@ namespace MBN
 
             for (; msb_diff >= 0; msb_diff--)
             {
+                // std::cout << "in div loop" << std::endl;
+                // std::cout << rem << std::endl;
+                // std::cout << internal_b << std::endl;
+                // std::cout << result << std::endl;
+
                 if ((comp_u = compare_unsigned(rem, b)) == 1)
                 {
+                    // std::cout << "in small rem detect" << std::endl;
+
                     if (msb_diff && want_result)
                     {
                         internal_shift_helper(result, msb_diff, true);
@@ -709,8 +715,38 @@ namespace MBN
 
     std::ostream &operator<<(std::ostream &strm, const Bigint &num)
     {
-        strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
+        // strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
+        strm << "Bits count: " << (num.bytes.getSize() * 8) << ' ' << num.to_string();
+
         return strm;
+    }
+
+    string Bigint::to_string() const
+    {
+
+        // std::cout << "in to string" << std::endl;
+
+        using std::to_string;
+        string result;
+
+        m_bytes rem(bytes);
+        m_bytes res;
+        static const Bigint ten(10, 0);
+
+        do
+        {
+            // std::cout << "in string loop" << std::endl;
+            res.clear();
+            internal_div(rem, ten.bytes, res, true);
+            result = ((char)(rem[0] + 48)) + result;
+            rem = res;
+            // std::cout << res << std::endl;
+        } while (!is_zero(res));
+        if (sign)
+        {
+            result = '-' + result;
+        }
+        return result;
     }
 
     void swap(Bigint &self, Bigint &other)

@@ -13,6 +13,7 @@ namespace MBN
     using uint64_t = std::uint64_t;
     using int64_t = std::int64_t;
     using m_bytes = ArrayList<uint8_t>;
+    using std::string;
 
     class Bigint
     {
@@ -52,7 +53,7 @@ namespace MBN
     public:
         Bigint(std::int64_t num);
         Bigint(uint64_t num, bool sign);
-        Bigint(const std::string &num);
+        Bigint(const string &num);
         Bigint(const char *num);
         Bigint(const Bigint &other);
         Bigint(Bigint &&other);
@@ -83,6 +84,8 @@ namespace MBN
         bool operator!=(const Bigint &other) const;
         bool operator>=(const Bigint &other) const;
         bool operator<=(const Bigint &other) const;
+
+        string to_string() const;
     };
 
 } // namespace MBN
