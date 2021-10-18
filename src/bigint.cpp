@@ -530,7 +530,6 @@ namespace MBN
             m_bytes smaller = is_a_smaller ? internal_a : internal_b;
             static const Bigint two(2, 0);
             static const Bigint one(1, 0);
-            comp_u = compare_unsigned(smaller, two.bytes);
 
             size_t msb;
             while (compare_unsigned(smaller, two.bytes) <= 0)

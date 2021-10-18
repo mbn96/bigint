@@ -32,24 +32,24 @@ int main(int argc, char const *argv[])
 {
     // cout << "hey" << endl;
 
-    Bigint a(455, false);
-    Bigint b(121, 0);
-    Bigint c = a + b;
-    Bigint d = a * b;
-    d = d * c * a;
-    Bigint e = a - b;
-    Bigint f = b - a;
-    Bigint g = a / b;
-    Bigint h = a % b;
+    // Bigint a(455, false);
+    // Bigint b(121, 0);
+    // Bigint c = a + b;
+    // Bigint d = a * b;
+    // d = d * c * a;
+    // Bigint e = a - b;
+    // Bigint f = b - a;
+    // Bigint g = a / b;
+    // Bigint h = a % b;
 
-    cout << a << endl;
-    cout << b << endl;
-    cout << c << endl;
-    cout << d << endl;
-    cout << e << endl;
-    cout << f << endl;
-    cout << g << endl;
-    cout << h << endl;
+    // cout << a << endl;
+    // cout << b << endl;
+    // cout << c << endl;
+    // cout << d << endl;
+    // cout << e << endl;
+    // cout << f << endl;
+    // cout << g << endl;
+    // cout << h << endl;
 
     // cout << (a > b) << endl;
 
