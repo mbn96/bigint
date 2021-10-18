@@ -79,6 +79,8 @@ namespace MBN
 
         ~ArrayList()
         {
+            // std::cout << "Here in custom destructor ArrList.\n";
+
             delete[] arr;
         }
 
@@ -220,7 +222,7 @@ namespace MBN
     {
         using std::swap;
 
-        // std::cout << "Here in custom swap.\n";
+        // std::cout << "Here in custom swap ArrList.\n";
         // std::cout << self << std::endl;
         // std::cout << other << std::endl;
 

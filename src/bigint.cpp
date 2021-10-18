@@ -601,6 +601,11 @@ namespace MBN
 
     Bigint::Bigint(const Bigint &other) : bytes(other.bytes), sign(other.sign) {}
 
+    Bigint::Bigint(Bigint &&other)
+    {
+        swap(*this, other);
+    }
+
     Bigint::Bigint(uint64_t num, bool sign) : sign(sign)
     {
         // using std::cout;
@@ -618,7 +623,16 @@ namespace MBN
 
     Bigint::Bigint(const m_bytes &bs, uint8_t sign) : bytes(bs), sign(sign) {}
 
-    Bigint::~Bigint() {}
+    Bigint::~Bigint()
+    {
+        // std::cout << "Here in custom destructor Bigint.\n";
+    }
+
+    Bigint &Bigint::operator=(Bigint other)
+    {
+        swap(*this, other);
+        return *this;
+    }
 
     Bigint Bigint::operator+(const Bigint &other) const
     {
@@ -695,6 +709,15 @@ namespace MBN
     {
         strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
         return strm;
+    }
+
+    void swap(Bigint &self, Bigint &other)
+    {
+        // std::cout << "Here in custom swap Bigint.\n";
+        using MBN::swap;
+        swap(self.bytes, other.bytes);
+        using std::swap;
+        swap(self.sign, other.sign);
     }
 
 }
