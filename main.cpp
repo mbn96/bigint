@@ -16,6 +16,18 @@ using MBN::Bigint;
 //     return ints;
 // }
 
+Bigint factor(const Bigint &num)
+{
+    static const Bigint one(1, 0);
+
+    if (num == one)
+    {
+        return one;
+    }
+
+    return num * factor(num - one);
+}
+
 int main(int argc, char const *argv[])
 {
     Bigint a(455, false);
@@ -37,6 +49,11 @@ int main(int argc, char const *argv[])
     cout << h << endl;
 
     cout << (a > b) << endl;
+
+    Bigint fac_num(500, 0);
+    Bigint fact = factor(fac_num);
+
+    cout << fact << endl;
 
     // auto list = get_ints();
 

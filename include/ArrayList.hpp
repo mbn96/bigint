@@ -192,6 +192,11 @@ namespace MBN
             return r_out;
         }
 
+        T popLast()
+        {
+            return removeAt(size - 1);
+        }
+
         void clear()
         {
             delete[] arr;

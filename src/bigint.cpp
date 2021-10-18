@@ -176,6 +176,55 @@ namespace MBN
         return get_msb(bytes);
     }
 
+    void Bigint::internal_or(m_bytes &res, const m_bytes &b) const
+    {
+        size_t a_len = res.getSize();
+        size_t b_len = b.getSize();
+        size_t smaller_len = a_len > b_len ? b_len : a_len;
+
+        if (a_len < b_len)
+        {
+            for (size_t i = 0; i < b_len; i++)
+            {
+                res.append(b[i]);
+            }
+        }
+
+        uint8_t temp_8 = 0;
+
+        for (size_t i = 0; i < smaller_len; i++)
+        {
+            temp_8 = res[i];
+            res[i] = temp_8 | b[i];
+        }
+    }
+
+    void Bigint::internal_and(m_bytes &res, const m_bytes &b) const
+    {
+        size_t a_len = res.getSize();
+        size_t b_len = b.getSize();
+        size_t smaller_len = a_len > b_len ? b_len : a_len;
+
+        if (a_len > b_len)
+        {
+            size_t c = a_len - b_len;
+            for (size_t i = 0; i < c; i++)
+            {
+                res.popLast();
+            }
+        }
+
+        uint8_t temp_8 = 0;
+
+        for (size_t i = 0; i < smaller_len; i++)
+        {
+            temp_8 = res[i];
+            res[i] = temp_8 & b[i];
+        }
+
+        trim_bytes(res);
+    }
+
     void Bigint::internal_add(m_bytes &res, const m_bytes &b) const
     {
         size_t a_len = res.getSize();
@@ -511,8 +560,7 @@ namespace MBN
                     internal_sub(rem, internal_b);
                     if (want_result)
                     {
-                        // TODO: use OR instead of ADD
-                        internal_add(result, big_one.bytes);
+                        internal_or(result, big_one.bytes);
                     }
                 }
                 if (msb_diff)
@@ -550,6 +598,8 @@ namespace MBN
         }
         return 0;
     }
+
+    Bigint::Bigint(const Bigint &other) : bytes(other.bytes), sign(other.sign) {}
 
     Bigint::Bigint(uint64_t num, bool sign) : sign(sign)
     {
@@ -643,7 +693,7 @@ namespace MBN
 
     std::ostream &operator<<(std::ostream &strm, const Bigint &num)
     {
-        strm << (num.sign ? " - " : "") << num.bytes;
+        strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
         return strm;
     }
 

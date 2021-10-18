@@ -32,6 +32,9 @@ namespace MBN
         void internal_sub(m_bytes &res, const m_bytes &b) const;
         m_bytes internal_add_sub(const Bigint &b, uint8_t b_sign, uint8_t &res_sign) const;
 
+        void internal_or(m_bytes &res, const m_bytes &b) const;
+        void internal_and(m_bytes &res, const m_bytes &b) const;
+
         void internal_left_shift(m_bytes &res, uint64_t shift) const;
         void internal_right_shift(m_bytes &res, uint64_t shift) const;
         void internal_shift_helper(m_bytes &res, uint64_t shift, bool left_shift) const;
