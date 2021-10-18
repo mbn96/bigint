@@ -381,7 +381,9 @@ namespace MBN
     {
         size_t full_shifts = shift / 8;
         size_t partial_shift = shift % 8;
+        
 
+        //TODO: impelement new shift functions with Queue...
         if (left_shift)
         {
             for (size_t i = 0; i < full_shifts; i++)

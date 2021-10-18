@@ -36,7 +36,11 @@ namespace MBN
         void internal_and(m_bytes &res, const m_bytes &b) const;
 
         void internal_left_shift(m_bytes &res, uint64_t shift) const;
+        void internal_left_shift_long(m_bytes &res, uint64_t shift) const;
+
         void internal_right_shift(m_bytes &res, uint64_t shift) const;
+        void internal_right_shift_long(m_bytes &res, uint64_t shift) const;
+
         void internal_shift_helper(m_bytes &res, uint64_t shift, bool left_shift) const;
 
         void internal_multi(m_bytes &res, const m_bytes &b) const;
