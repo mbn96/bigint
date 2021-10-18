@@ -53,29 +53,29 @@ namespace MBN
         }
     }
 
-    int Bigint::compare_unsigned(const Bigint &other) const
+    int Bigint::compare_unsigned(const m_bytes &a, const m_bytes &b) const
     {
         size_t msb_1, msb_2;
-        msb_1 = get_msb();
-        msb_2 = other.get_msb();
+        msb_1 = get_msb(a);
+        msb_2 = get_msb(b);
 
         if (msb_1 == msb_2)
         {
-            size_t curr_bytes_index = bytes.getSize();
+            size_t curr_bytes_index = a.getSize();
             if (curr_bytes_index == 0)
             {
                 return 0;
             }
             --curr_bytes_index;
             uint8_t curr_last_byte_1, curr_last_byte_2;
-            curr_last_byte_1 = bytes[curr_bytes_index];
-            curr_last_byte_2 = other.bytes[curr_bytes_index];
+            curr_last_byte_1 = a[curr_bytes_index];
+            curr_last_byte_2 = b[curr_bytes_index];
 
             while ((curr_last_byte_1 == curr_last_byte_2) && (curr_bytes_index > 0))
             {
                 --curr_bytes_index;
-                curr_last_byte_1 = bytes[curr_bytes_index];
-                curr_last_byte_2 = other.bytes[curr_bytes_index];
+                curr_last_byte_1 = a[curr_bytes_index];
+                curr_last_byte_2 = b[curr_bytes_index];
             }
 
             if (curr_last_byte_1 > curr_last_byte_2)
@@ -99,6 +99,56 @@ namespace MBN
         {
             return 1;
         }
+    }
+
+    int Bigint::compare_unsigned(const Bigint &other) const
+    {
+        return compare_unsigned(bytes, other.bytes);
+
+        // size_t msb_1, msb_2;
+        // msb_1 = get_msb();
+        // msb_2 = other.get_msb();
+
+        // if (msb_1 == msb_2)
+        // {
+        //     size_t curr_bytes_index = bytes.getSize();
+        //     if (curr_bytes_index == 0)
+        //     {
+        //         return 0;
+        //     }
+        //     --curr_bytes_index;
+        //     uint8_t curr_last_byte_1, curr_last_byte_2;
+        //     curr_last_byte_1 = bytes[curr_bytes_index];
+        //     curr_last_byte_2 = other.bytes[curr_bytes_index];
+
+        //     while ((curr_last_byte_1 == curr_last_byte_2) && (curr_bytes_index > 0))
+        //     {
+        //         --curr_bytes_index;
+        //         curr_last_byte_1 = bytes[curr_bytes_index];
+        //         curr_last_byte_2 = other.bytes[curr_bytes_index];
+        //     }
+
+        //     if (curr_last_byte_1 > curr_last_byte_2)
+        //     {
+        //         return -1;
+        //     }
+        //     else if (curr_last_byte_1 < curr_last_byte_2)
+        //     {
+        //         return 1;
+        //     }
+        //     else
+        //     {
+        //         return 0;
+        //     }
+        // }
+        // else if (msb_1 > msb_2)
+        // {
+        //     return -1;
+        // }
+        // else
+        // {
+        //     return 1;
+        // }
     }
 
     bool Bigint::is_zero(const m_bytes &bs) const
@@ -278,6 +328,29 @@ namespace MBN
     // }
 #pragma endregion
 
+    void Bigint::internal_shift_helper(m_bytes &res, uint64_t shift, bool left_shift) const
+    {
+        size_t full_shifts = shift / 8;
+        size_t partial_shift = shift % 8;
+
+        if (left_shift)
+        {
+            for (size_t i = 0; i < full_shifts; i++)
+            {
+                internal_left_shift(res, 8);
+            }
+            internal_left_shift(res, partial_shift);
+        }
+        else
+        {
+            for (size_t i = 0; i < full_shifts; i++)
+            {
+                internal_right_shift(res, 8);
+            }
+            internal_right_shift(res, partial_shift);
+        }
+    }
+
     void Bigint::internal_left_shift(m_bytes &res, uint64_t shift) const
     {
         if (shift > 8)
@@ -311,7 +384,7 @@ namespace MBN
     {
         if (shift > 8)
         {
-            throw std::invalid_argument("internal_left_shift been called with shift value greater than 8.");
+            throw std::invalid_argument("internal_right_shift been called with shift value greater than 8.");
         }
         else if (shift)
         {
@@ -404,6 +477,66 @@ namespace MBN
         }
     }
 
+    void Bigint::internal_div(m_bytes &rem, const m_bytes &b, m_bytes &result, bool want_result) const
+    {
+        if (is_zero(b))
+        {
+            throw std::invalid_argument("Divisor is equal to zero(0).");
+        }
+
+        int comp_u = compare_unsigned(rem, b);
+        if (comp_u == -1)
+        {
+            // actual divide logic:
+            m_bytes internal_b(b);
+            int64_t msb_diff = get_msb(rem) - get_msb(b);
+            static const Bigint big_one(1, 0);
+            internal_shift_helper(internal_b, msb_diff, true);
+            result.append(0);
+
+            for (; msb_diff >= 0; msb_diff--)
+            {
+                if ((comp_u = compare_unsigned(rem, b)) == 1)
+                {
+                    if (msb_diff && want_result)
+                    {
+                        internal_shift_helper(result, msb_diff, true);
+                    }
+
+                    return;
+                }
+                comp_u = compare_unsigned(rem, internal_b);
+                if (comp_u <= 0)
+                {
+                    internal_sub(rem, internal_b);
+                    if (want_result)
+                    {
+                        // TODO: use OR instead of ADD
+                        internal_add(result, big_one.bytes);
+                    }
+                }
+                if (msb_diff)
+                {
+                    internal_right_shift(internal_b, 1);
+                    if (want_result)
+                    {
+                        internal_left_shift(result, 1);
+                    }
+                }
+            }
+        }
+        else if (comp_u)
+        {
+            result.append(0);
+        }
+        else
+        {
+            rem.clear();
+            rem.append(0);
+            result.append(1);
+        }
+    }
+
     static size_t get_ms_byte(uint64_t num)
     {
         uint64_t temp = 0xffu;
@@ -457,6 +590,23 @@ namespace MBN
         m_bytes res(bytes);
         internal_multi(res, other.bytes);
         return Bigint(res, sign == other.sign ? 0 : 1);
+    }
+
+    Bigint Bigint::operator/(const Bigint &other) const
+    {
+        m_bytes rem(bytes);
+        m_bytes result;
+        internal_div(rem, other.bytes, result, true);
+        return Bigint(result, sign == other.sign ? 0 : 1);
+    }
+
+    //TODO: Needs some work...
+    Bigint Bigint::operator%(const Bigint &other) const
+    {
+        m_bytes rem(bytes);
+        m_bytes result;
+        internal_div(rem, other.bytes, result, false);
+        return Bigint(rem, sign == other.sign ? 0 : 1);
     }
 
     bool Bigint::operator>(const Bigint &other) const
