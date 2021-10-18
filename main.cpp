@@ -30,6 +30,8 @@ Bigint factor(Bigint num)
 
 int main(int argc, char const *argv[])
 {
+    cout << "hey" << endl;
+
     Bigint a(455, false);
     Bigint b(121, 0);
     Bigint c = a + b;
@@ -50,7 +52,7 @@ int main(int argc, char const *argv[])
 
     cout << (a > b) << endl;
 
-    Bigint fac_num(340, 0);
+    Bigint fac_num(1500, 0);
     Bigint fact(1, 0);
     fact = factor(fac_num);
 

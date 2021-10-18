@@ -127,7 +127,7 @@ namespace MBN
             return size;
         }
 
-        std::int64_t indexOf(T item) const
+        std::int64_t indexOf(const T &item) const
         {
             for (size_t i = 0; i < size; i++)
             {
@@ -139,7 +139,7 @@ namespace MBN
             return -1;
         }
 
-        void append(T item)
+        void append(const T &item)
         {
             if (size == arr_len)
             {
@@ -148,13 +148,13 @@ namespace MBN
             arr[size++] = item;
         }
 
-        ArrayList<T> &operator<<(T item)
+        ArrayList<T> &operator<<(const T &item)
         {
             append(item);
             return *this;
         }
 
-        void insert(T item, size_t index)
+        void insert(const T &item, size_t index)
         {
             if (index >= size)
             {
@@ -196,7 +196,53 @@ namespace MBN
 
         T popLast()
         {
-            return removeAt(size - 1);
+            if (size == 0)
+            {
+                throw std::invalid_argument("Index out of bound.");
+            }
+            // T r_out = arr[size--];
+            return arr[size--];
+        }
+
+        void popLast_no_return()
+        {
+            if (size == 0)
+            {
+                throw std::invalid_argument("Index out of bound.");
+            }
+            size--;
+        }
+
+        void shift_in(size_t shift)
+        {
+            if (shift >= size)
+            {
+                clear();
+            }
+            else
+            {
+                std::copy(arr + shift, arr + size, arr);
+                size -= shift;
+            }
+        }
+
+        void shift_out(size_t shift, const T &fill_item)
+        {
+            if ((size + shift) > arr_len)
+            {
+                arr_len = 2 * (size + shift);
+                T *temp = new T[arr_len];
+                std::copy(arr, arr + size, temp + shift);
+                delete[] arr;
+                this->arr = temp;
+                std::fill(arr, arr + shift, fill_item);
+            }
+            else
+            {
+                std::copy_backward(arr, arr + size, arr + size + shift);
+                std::fill(arr, arr + shift, fill_item);
+            }
+            size += shift;
         }
 
         void clear()
