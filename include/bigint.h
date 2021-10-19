@@ -28,6 +28,7 @@ namespace MBN
         bool is_zero(const m_bytes &bs) const;
 
         size_t get_msb(const m_bytes &bs) const;
+        size_t get_lsb(const m_bytes &bs) const;
 
         void internal_add(m_bytes &res, const m_bytes &b) const;
         void internal_sub(m_bytes &res, const m_bytes &b) const;
@@ -48,6 +49,8 @@ namespace MBN
         void internal_multi(m_bytes &res, uint8_t b) const;
         void internal_div(m_bytes &rem, const m_bytes &b, m_bytes &result, bool want_result) const;
 
+        void internal_div_alter(m_bytes a, m_bytes b, m_bytes &result) const;
+
         Bigint(const m_bytes &bs, uint8_t sign);
 
     public:
@@ -63,6 +66,7 @@ namespace MBN
         friend std::ostream &operator<<(std::ostream &strm, const Bigint &num);
 
         size_t get_msb() const;
+        size_t get_lsb() const;
 
         Bigint &operator=(Bigint other);
 

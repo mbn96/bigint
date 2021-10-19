@@ -23,7 +23,7 @@ namespace MBN
                 }
                 else
                 {
-                    bs.removeAt(i);
+                    bs.popLast_no_return();
                 }
             }
         }
@@ -156,6 +156,43 @@ namespace MBN
         return (bs.getSize() == 1) && (bs[0] == 0);
     }
 
+    static size_t get_lsByte(const m_bytes &bs)
+    {
+        size_t len = bs.getSize();
+        for (size_t i = 0; i < len; i++)
+        {
+            if (bs[i])
+            {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    size_t Bigint::get_lsb(const m_bytes &bs) const
+    {
+        size_t lsByteIndex = get_lsByte(bs);
+        uint8_t lsByte = bs[lsByteIndex];
+
+        int lsb = 0;
+        for (; lsb < 8; lsb++)
+        {
+            if (lsByte & (ONE_U << lsb))
+            {
+                break;
+            }
+        }
+
+        // if (lsb == 8)
+        // {
+        //     return 0;
+        // }
+
+        return (lsb == 8) ? 0 : ((lsByteIndex << 3) + lsb);
+
+        // return (lsByteIndex << 3) + lsb;
+    }
+
     size_t Bigint::get_msb(const m_bytes &bs) const
     {
         size_t bytes_count = bs.getSize() - 1;
@@ -174,6 +211,11 @@ namespace MBN
     size_t Bigint::get_msb() const
     {
         return get_msb(bytes);
+    }
+
+    size_t Bigint::get_lsb() const
+    {
+        return get_lsb(bytes);
     }
 
     void Bigint::internal_or(m_bytes &res, const m_bytes &b) const
@@ -382,7 +424,6 @@ namespace MBN
         size_t full_shifts = shift / 8;
         size_t partial_shift = shift % 8;
 
-        
         if (left_shift)
         {
             if (full_shifts)
@@ -509,40 +550,193 @@ namespace MBN
         }
     }
 
+    static void set_bit(m_bytes &bs, size_t bit)
+    {
+        bs[bit / 8] |= (1 << (bit % 8));
+    }
+
     void Bigint::internal_multi(m_bytes &res, const m_bytes &b) const
     {
         if (!(is_zero(res) || is_zero(b)))
         {
-            m_bytes a(res);
-            size_t b_len = b.getSize() - 1;
+            int comp_u = compare_unsigned(res, b);
+
+            m_bytes internal_b(b);
+            m_bytes internal_a(res);
+            m_bytes temp;
+
             res.clear();
+            res.append(0);
 
-            // // taking care of the first byte:
-            // internal_multi(res, b[b_len]);
-            // internal_left_shift(res, 8);
+            bool is_a_smaller = (comp_u == 1);
+            m_bytes smaller = is_a_smaller ? internal_a : internal_b;
+            static const Bigint two(2, 0);
+            static const Bigint one(1, 0);
 
-            // iterate bytes:
-            for (size_t i = b_len; i > 0; i--)
+            size_t msb;
+            while (compare_unsigned(smaller, two.bytes) <= 0)
             {
-                if (b[i])
+                msb = get_msb(smaller);
+                m_bytes subtractor(smaller.getSize(), 0);
+                set_bit(subtractor, msb);
+                internal_sub(smaller, subtractor);
+
+                if (is_a_smaller)
                 {
-                    m_bytes temp(a);
-                    internal_multi(temp, b[i]);
-                    internal_add(res, temp);
+                    temp = internal_b;
                 }
-                // internal_left_shift(res, 8);
-                internal_shift_helper(res, 8, true);
+                else
+                {
+                    temp = internal_a;
+                }
+
+                internal_shift_helper(temp, msb, true);
+                internal_add(res, temp);
             }
-            if (b[0])
+
+            if (compare_unsigned(smaller, one.bytes) == 0)
             {
-                internal_multi(a, b[0]);
-                internal_add(res, a);
+                if (is_a_smaller)
+                {
+                    temp = internal_b;
+                }
+                else
+                {
+                    temp = internal_a;
+                }
+
+                internal_add(res, temp);
             }
         }
         else
         {
             res.clear();
             res.append(0);
+        }
+    }
+
+    // void Bigint::internal_multi(m_bytes &res, const m_bytes &b) const
+    // {
+    //     if (!(is_zero(res) || is_zero(b)))
+    //     {
+    //         m_bytes a(res);
+    //         size_t b_len = b.getSize() - 1;
+    //         res.clear();
+
+    //         // // taking care of the first byte:
+    //         // internal_multi(res, b[b_len]);
+    //         // internal_left_shift(res, 8);
+
+    //         // iterate bytes:
+    //         for (size_t i = b_len; i > 0; i--)
+    //         {
+    //             if (b[i])
+    //             {
+    //                 m_bytes temp(a);
+    //                 internal_multi(temp, b[i]);
+    //                 internal_add(res, temp);
+    //             }
+    //             // internal_left_shift(res, 8);
+    //             internal_shift_helper(res, 8, true);
+    //         }
+    //         if (b[0])
+    //         {
+    //             internal_multi(a, b[0]);
+    //             internal_add(res, a);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         res.clear();
+    //         res.append(0);
+    //     }
+    // }
+
+    void Bigint::internal_div_alter(m_bytes a, m_bytes b, m_bytes &result) const
+    {
+        if (is_zero(b))
+        {
+            throw std::invalid_argument("Divisor is equal to zero(0).");
+        }
+
+        int comp_u = compare_unsigned(a, b);
+        if (comp_u == -1)
+        {
+            result.append(0);
+            // int64_t msb_diff = get_msb(a) - get_msb(b);
+            // int64_t a_lsb = get_lsb(a);
+            // int64_t min_shift = a_lsb < msb_diff ? a_lsb : msb_diff;
+
+            // // shift result to left after division.
+            // int64_t result_left_shift = 0;
+
+            // if (min_shift)
+            // {
+            //     internal_shift_helper(a, min_shift, false);
+            //     if ((comp_u = compare_unsigned(a, b)) == 1)
+            //     {
+            //         internal_left_shift(a, 1);
+            //         --min_shift;
+            //     }
+
+            //     result_left_shift = min_shift;
+            // }
+
+            int64_t a_lsb = get_lsb(a);
+            int64_t b_lsb = get_lsb(b);
+            int64_t min_shift = a_lsb < b_lsb ? a_lsb : b_lsb;
+            internal_shift_helper(a, min_shift, false);
+            internal_shift_helper(b, min_shift, false);
+            int64_t msb_diff = get_msb(a) - get_msb(b);
+
+            static const Bigint big_one(1, 0);
+            m_bytes internal_b(b);
+            internal_shift_helper(internal_b, msb_diff, true);
+
+            for (; msb_diff >= 0; msb_diff--)
+            {
+                // std::cout << "in div loop" << std::endl;
+                // std::cout << rem << std::endl;
+                // std::cout << internal_b << std::endl;
+                // std::cout << result << std::endl;
+
+                if ((comp_u = compare_unsigned(a, b)) == 1)
+                {
+                    // std::cout << "in small rem detect" << std::endl;
+
+                    if (msb_diff /*|| result_left_shift*/)
+                    {
+                        internal_shift_helper(result, msb_diff /*+ result_left_shift*/, true);
+                    }
+
+                    return;
+                }
+                comp_u = compare_unsigned(a, internal_b);
+                if (comp_u <= 0)
+                {
+                    internal_sub(a, internal_b);
+                    internal_or(result, big_one.bytes);
+                }
+                if (msb_diff)
+                {
+                    internal_right_shift(internal_b, 1);
+                    internal_left_shift(result, 1);
+                }
+            }
+            /*
+            if (result_left_shift)
+            {
+                internal_shift_helper(result, result_left_shift, true);
+            }
+            */
+        }
+        else if (comp_u)
+        {
+            result.append(0);
+        }
+        else
+        {
+            result.append(1);
         }
     }
 
@@ -685,9 +879,9 @@ namespace MBN
 
     Bigint Bigint::operator/(const Bigint &other) const
     {
-        m_bytes rem(bytes);
+        // m_bytes rem(bytes);
         m_bytes result;
-        internal_div(rem, other.bytes, result, true);
+        internal_div_alter(bytes, other.bytes, result);
         return Bigint(result, sign == other.sign ? 0 : 1);
     }
 
@@ -734,8 +928,8 @@ namespace MBN
 
     std::ostream &operator<<(std::ostream &strm, const Bigint &num)
     {
-        strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
-        // strm << "Bits count: " << (num.bytes.getSize() * 8) << ' ' << num.to_string();
+        // strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
+        strm << "Bits count: " << (num.bytes.getSize() * 8) << ' ' << num.to_string();
 
         return strm;
     }
@@ -744,7 +938,6 @@ namespace MBN
     {
 
         // std::cout << "in to string" << std::endl;
-
         using std::to_string;
         string result;
 
@@ -776,5 +969,4 @@ namespace MBN
         using std::swap;
         swap(self.sign, other.sign);
     }
-
 }
