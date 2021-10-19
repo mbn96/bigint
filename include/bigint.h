@@ -11,7 +11,9 @@ namespace MBN
     using uint16_t = std::uint16_t;
     using uint32_t = std::uint32_t;
     using uint64_t = std::uint64_t;
+    using int64_t = std::int64_t;
     using m_bytes = ArrayList<uint8_t>;
+    using std::string;
 
     class Bigint
     {
@@ -21,6 +23,7 @@ namespace MBN
 
         int compare(const Bigint &other) const;
         int compare_unsigned(const Bigint &other) const;
+        int compare_unsigned(const m_bytes &a, const m_bytes &b) const;
 
         bool is_zero(const m_bytes &bs) const;
 
@@ -30,19 +33,27 @@ namespace MBN
         void internal_sub(m_bytes &res, const m_bytes &b) const;
         m_bytes internal_add_sub(const Bigint &b, uint8_t b_sign, uint8_t &res_sign) const;
 
+        void internal_or(m_bytes &res, const m_bytes &b) const;
+        void internal_and(m_bytes &res, const m_bytes &b) const;
+
         void internal_left_shift(m_bytes &res, uint64_t shift) const;
+        void internal_left_shift_long(m_bytes &res, uint64_t shift) const;
+
         void internal_right_shift(m_bytes &res, uint64_t shift) const;
+        void internal_right_shift_long(m_bytes &res, uint64_t shift) const;
+
+        void internal_shift_helper(m_bytes &res, uint64_t shift, bool left_shift) const;
 
         void internal_multi(m_bytes &res, const m_bytes &b) const;
         void internal_multi(m_bytes &res, uint8_t b) const;
-        void internal_div(m_bytes &res, const m_bytes &b) const;
+        void internal_div(m_bytes &rem, const m_bytes &b, m_bytes &result, bool want_result) const;
 
         Bigint(const m_bytes &bs, uint8_t sign);
 
     public:
         Bigint(std::int64_t num);
         Bigint(uint64_t num, bool sign);
-        Bigint(const std::string &num);
+        Bigint(const string &num);
         Bigint(const char *num);
         Bigint(const Bigint &other);
         Bigint(Bigint &&other);
@@ -59,6 +70,7 @@ namespace MBN
         Bigint operator-(const Bigint &other) const;
         Bigint operator*(const Bigint &other) const;
         Bigint operator/(const Bigint &other) const;
+        Bigint operator%(const Bigint &other) const;
 
         Bigint operator<<(uint64_t shift) const;
         Bigint operator>>(uint64_t shift) const;
@@ -72,6 +84,8 @@ namespace MBN
         bool operator!=(const Bigint &other) const;
         bool operator>=(const Bigint &other) const;
         bool operator<=(const Bigint &other) const;
+
+        string to_string() const;
     };
 
 } // namespace MBN
