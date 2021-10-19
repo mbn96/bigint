@@ -926,8 +926,8 @@ namespace MBN
 
     std::ostream &operator<<(std::ostream &strm, const Bigint &num)
     {
-        strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
-        // strm << "Bits count: " << (num.bytes.getSize() * 8) << ' ' << num.to_string();
+        // strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
+        strm << "Bits count: " << (num.bytes.getSize() * 8) << ' ' << num.to_string();
 
         return strm;
     }
