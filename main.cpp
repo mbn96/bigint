@@ -45,13 +45,13 @@ int main(int argc, char const *argv[])
     Bigint g = b1 / b2;
     Bigint h = b3 / b1;
 
-    // Bigint c = a + b;
-    // Bigint d = a * b;
-    // d = d * c * a;
-    // Bigint e = a - b;
-    // Bigint f = b - a;
-    // Bigint g = a / b;
-    // Bigint h = a % b;
+    // // Bigint c = a + b;
+    // // Bigint d = a * b;
+    // // d = d * c * a;
+    // // Bigint e = a - b;
+    // // Bigint f = b - a;
+    // // Bigint g = a / b;
+    // // Bigint h = a % b;
 
     cout << a << endl;
     cout << b << endl;
