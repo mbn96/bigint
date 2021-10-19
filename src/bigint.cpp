@@ -663,31 +663,31 @@ namespace MBN
         if (comp_u == -1)
         {
             result.append(0);
-            int64_t msb_diff = get_msb(a) - get_msb(b);
+            // int64_t msb_diff = get_msb(a) - get_msb(b);
+            // int64_t a_lsb = get_lsb(a);
+            // int64_t min_shift = a_lsb < msb_diff ? a_lsb : msb_diff;
+
+            // // shift result to left after division.
+            // int64_t result_left_shift = 0;
+
+            // if (min_shift)
+            // {
+            //     internal_shift_helper(a, min_shift, false);
+            //     if ((comp_u = compare_unsigned(a, b)) == 1)
+            //     {
+            //         internal_left_shift(a, 1);
+            //         --min_shift;
+            //     }
+
+            //     result_left_shift = min_shift;
+            // }
+
             int64_t a_lsb = get_lsb(a);
-            int64_t min_shift = a_lsb < msb_diff ? a_lsb : msb_diff;
-
-            // shift result to left after division.
-            int64_t result_left_shift = 0;
-
-            if (min_shift)
-            {
-                internal_shift_helper(a, min_shift, false);
-                if ((comp_u = compare_unsigned(a, b)) == 1)
-                {
-                    internal_left_shift(a, 1);
-                    --min_shift;
-                }
-
-                result_left_shift = min_shift;
-            }
-
-            a_lsb = get_lsb(a);
             int64_t b_lsb = get_lsb(b);
-            min_shift = a_lsb < b_lsb ? a_lsb : b_lsb;
+            int64_t min_shift = a_lsb < b_lsb ? a_lsb : b_lsb;
             internal_shift_helper(a, min_shift, false);
             internal_shift_helper(b, min_shift, false);
-            msb_diff = get_msb(a) - get_msb(b);
+           int64_t msb_diff = get_msb(a) - get_msb(b);
 
             static const Bigint big_one(1, 0);
             m_bytes internal_b(b);
@@ -704,9 +704,9 @@ namespace MBN
                 {
                     // std::cout << "in small rem detect" << std::endl;
 
-                    if (msb_diff || result_left_shift)
+                    if (msb_diff /*|| result_left_shift*/)
                     {
-                        internal_shift_helper(result, msb_diff + result_left_shift, true);
+                        internal_shift_helper(result, msb_diff /*+ result_left_shift*/, true);
                     }
 
                     return;
@@ -723,10 +723,12 @@ namespace MBN
                     internal_left_shift(result, 1);
                 }
             }
+            /*
             if (result_left_shift)
             {
                 internal_shift_helper(result, result_left_shift, true);
             }
+            */
         }
         else if (comp_u)
         {
@@ -926,8 +928,8 @@ namespace MBN
 
     std::ostream &operator<<(std::ostream &strm, const Bigint &num)
     {
-        strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
-        // strm << "Bits count: " << (num.bytes.getSize() * 8) << ' ' << num.to_string();
+        // strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
+        strm << "Bits count: " << (num.bytes.getSize() * 8) << ' ' << num.to_string();
 
         return strm;
     }
@@ -940,19 +942,30 @@ namespace MBN
         using std::to_string;
         string result;
 
-        m_bytes rem(bytes);
+        m_bytes rem, rem2(bytes);
         m_bytes res;
         static const Bigint ten(10, 0);
-
+        bool is_res_zero = false;
         do
         {
             // std::cout << "in string loop" << std::endl;
             res.clear();
-            internal_div(rem, ten.bytes, res, true);
-            result = ((char)(rem[0] + 48)) + result;
-            rem = res;
-            // std::cout << res << std::endl;
-        } while (!is_zero(res));
+            internal_div_alter(rem2, ten.bytes, res);
+            is_res_zero = is_zero(res);
+            if (is_res_zero)
+            {
+                result = ((char)(rem2[0] + 48)) + result;
+            }
+            else
+            {
+                rem = ten.bytes;
+                internal_multi(rem, res);
+                // rem2 = bytes;
+                internal_sub(rem2, rem);
+                result = ((char)(rem2[0] + 48)) + result;
+                rem2 = res;
+            }
+        } while (!is_res_zero);
         if (sign)
         {
             result = '-' + result;
@@ -968,5 +981,4 @@ namespace MBN
         using std::swap;
         swap(self.sign, other.sign);
     }
-
 }
