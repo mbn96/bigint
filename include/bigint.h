@@ -12,7 +12,7 @@ namespace MBN
     using uint32_t = std::uint32_t;
     using uint64_t = std::uint64_t;
     using int64_t = std::int64_t;
-    using m_bytes = ArrayList<uint8_t>;
+    using m_bytes = ArrayList<uint32_t>;
     using std::string;
 
     class Bigint
