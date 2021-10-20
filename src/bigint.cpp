@@ -67,7 +67,7 @@ namespace MBN
                 return 0;
             }
             --curr_bytes_index;
-            uint8_t curr_last_byte_1, curr_last_byte_2;
+            uint32_t curr_last_byte_1, curr_last_byte_2;
             curr_last_byte_1 = a[curr_bytes_index];
             curr_last_byte_2 = b[curr_bytes_index];
 
@@ -172,10 +172,10 @@ namespace MBN
     size_t Bigint::get_lsb(const m_bytes &bs) const
     {
         size_t lsByteIndex = get_lsByte(bs);
-        uint8_t lsByte = bs[lsByteIndex];
+        uint32_t lsByte = bs[lsByteIndex];
 
         int lsb = 0;
-        for (; lsb < 8; lsb++)
+        for (; lsb < 32; lsb++)
         {
             if (lsByte & (ONE_U << lsb))
             {
@@ -188,7 +188,7 @@ namespace MBN
         //     return 0;
         // }
 
-        return (lsb == 8) ? 0 : ((lsByteIndex << 3) + lsb);
+        return (lsb == 32) ? 0 : ((lsByteIndex << 5) + lsb);
 
         // return (lsByteIndex << 3) + lsb;
     }
@@ -196,8 +196,8 @@ namespace MBN
     size_t Bigint::get_msb(const m_bytes &bs) const
     {
         size_t bytes_count = bs.getSize() - 1;
-        uint8_t lastByte = bs[bytes_count];
-        int msb = 7;
+        uint32_t lastByte = bs[bytes_count];
+        int msb = 31;
         for (; msb > 0; msb--)
         {
             if (lastByte & (ONE_U << msb))
@@ -205,7 +205,7 @@ namespace MBN
                 break;
             }
         }
-        return (bytes_count << 3) + msb;
+        return (bytes_count << 5) + msb;
     }
 
     size_t Bigint::get_msb() const
@@ -232,12 +232,12 @@ namespace MBN
             }
         }
 
-        uint8_t temp_8 = 0;
+        uint32_t temp_32 = 0;
 
         for (size_t i = 0; i < smaller_len; i++)
         {
-            temp_8 = res[i];
-            res[i] = temp_8 | b[i];
+            temp_32 = res[i];
+            res[i] = temp_32 | b[i];
         }
     }
 
@@ -256,12 +256,12 @@ namespace MBN
             }
         }
 
-        uint8_t temp_8 = 0;
+        uint32_t temp_32 = 0;
 
         for (size_t i = 0; i < smaller_len; i++)
         {
-            temp_8 = res[i];
-            res[i] = temp_8 & b[i];
+            temp_32 = res[i];
+            res[i] = temp_32 & b[i];
         }
 
         trim_bytes(res);
