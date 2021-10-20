@@ -46,7 +46,7 @@ namespace MBN
         void internal_shift_helper(m_bytes &res, uint64_t shift, bool left_shift) const;
 
         void internal_multi(m_bytes &res, const m_bytes &b) const;
-        void internal_multi(m_bytes &res, uint8_t b) const;
+        void internal_multi(m_bytes &res, uint32_t b) const;
         void internal_div(m_bytes &rem, const m_bytes &b, m_bytes &result, bool want_result) const;
 
         void internal_div_alter(m_bytes a, m_bytes b, m_bytes &result) const;

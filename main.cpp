@@ -38,20 +38,20 @@ int main(int argc, char const *argv[])
     Bigint b2(3, 0);
     Bigint b3(793, 0);
 
-    Bigint c = a / b;
-    Bigint d = a / b1;
-    Bigint e = a / b2;
-    Bigint f = a / b3;
-    Bigint g = b1 / b2;
-    Bigint h = b3 / b1;
+    // Bigint c = a / b;
+    // Bigint d = a / b1;
+    // Bigint e = a / b2;
+    // Bigint f = a / b3;
+    // Bigint g = b1 / b2;
+    // Bigint h = b3 / b1;
 
-    // // Bigint c = a + b;
-    // // Bigint d = a * b;
-    // // d = d * c * a;
-    // // Bigint e = a - b;
-    // // Bigint f = b - a;
-    // // Bigint g = a / b;
-    // // Bigint h = a % b;
+    Bigint c = a + b;
+    Bigint d = a * b;
+    d = d * c * a;
+    Bigint e = a - b;
+    Bigint f = b - a;
+    Bigint g = a / b;
+    Bigint h = a % b;
 
     cout << a << endl;
     cout << b << endl;
@@ -66,7 +66,7 @@ int main(int argc, char const *argv[])
 
     // cout << (a > b) << endl;
 
-    Bigint fac_num(500, 0);
+    Bigint fac_num(120, 0);
     Bigint fact(1, 0);
     fact = factor(fac_num);
 

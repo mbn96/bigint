@@ -308,7 +308,7 @@ namespace MBN
     // always assumes res > b.
     void Bigint::internal_sub(m_bytes &res, const m_bytes &b) const
     {
-        static const uint64_t CARRY_ONE = (0x1u << 32);
+        static const uint64_t CARRY_ONE = (0x1lu << 32);
 
         size_t a_len = res.getSize();
         size_t b_len = b.getSize();
@@ -508,7 +508,7 @@ namespace MBN
             uint64_t temp_64 = 0;
             uint32_t curr_byte, temp_32 = 0;
             size_t len = res.getSize();
-            shift = 8 - shift;
+            shift = 32 - shift;
 
             for (std::int64_t i = len - 1; i >= 0; i--)
             {
@@ -526,32 +526,34 @@ namespace MBN
         }
     }
 
-    void Bigint::internal_multi(m_bytes &res, uint8_t b) const
+    void Bigint::internal_multi(m_bytes &res, uint32_t b) const
     {
         if (b)
         {
+            uint64_t temp_64 = 0;
             uint32_t temp_32 = 0;
-            uint16_t temp_16 = 0;
             // uint8_t temp_8 = 0;
 
             size_t res_len = res.getSize();
 
             for (size_t i = 0; i < res_len; i++)
             {
-                temp_32 = res[i];
-                temp_32 *= b;
-                temp_32 += temp_16;
-                res[i] = temp_32 & _8_bit_mask;
-                temp_16 = temp_32 >> 8;
+                temp_64 = res[i];
+                temp_64 *= b;
+                temp_64 += temp_32;
+                res[i] = temp_64 & _32_bit_mask;
+                temp_32 = temp_64 >> 32;
             }
 
-            if (temp_16)
+            if (temp_32)
             {
-                res.append(temp_16 & _8_bit_mask);
-                if (temp_16 & 0xff00u)
-                {
-                    res.append(temp_16 >> 8);
-                }
+                // res.append(temp_32 & _8_bit_mask);
+                // if (temp_16 & 0xff00u)
+                // {
+                //     res.append(temp_16 >> 8);
+                // }
+
+                res.append(temp_32);
             }
         }
         else
@@ -563,7 +565,7 @@ namespace MBN
 
     static void set_bit(m_bytes &bs, size_t bit)
     {
-        bs[bit / 8] |= (1 << (bit % 8));
+        bs[bit / 32] |= (1u << (bit % 32));
     }
 
     void Bigint::internal_multi(m_bytes &res, const m_bytes &b) const
@@ -819,11 +821,11 @@ namespace MBN
 
     static size_t get_ms_byte(uint64_t num)
     {
-        uint64_t temp = 0xffu;
+        uint64_t temp = _32_bit_mask;
         using std::printf;
-        for (int i = 7; i > 0; i--)
+        for (int i = 1; i > 0; i--)
         {
-            if (num & (temp << (i * 8)))
+            if (num & (temp << (i * 32)))
             {
                 return i;
             }
@@ -849,7 +851,7 @@ namespace MBN
         // printf("this is num: %lx\n", num);
         for (size_t i = 0; i <= ms_byte; i++)
         {
-            bytes.append((num >> (i * 8)) & _8_bit_mask);
+            bytes.append((num >> (i * 32)) & _32_bit_mask);
         }
     }
 
@@ -893,6 +895,8 @@ namespace MBN
         // m_bytes rem(bytes);
         m_bytes result;
         internal_div_alter(bytes, other.bytes, result);
+        // internal_div(rem, other.bytes, result, true);
+
         return Bigint(result, sign == other.sign ? 0 : 1);
     }
 
@@ -940,7 +944,7 @@ namespace MBN
     std::ostream &operator<<(std::ostream &strm, const Bigint &num)
     {
         // strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
-        strm << "Bits count: " << (num.bytes.getSize() * 8) << ' ' << num.to_string();
+        strm << "Bits count: " << (num.bytes.getSize() * 32) << ' ' << num.to_string();
 
         return strm;
     }
