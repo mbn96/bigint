@@ -4,6 +4,8 @@
 #define ONE_U 0x1u
 #define TEN_U 0xau
 #define _8_bit_mask 0xffu
+#define _16_bit_mask 0xffffu
+#define _32_bit_mask 0xffffffffu
 
 namespace MBN
 {
@@ -273,15 +275,15 @@ namespace MBN
         size_t b_len = b.getSize();
         size_t bigger_len = a_len > b_len ? a_len : b_len;
 
-        uint16_t temp_16 = 0;
-        uint8_t temp_8 = 0;
+        uint64_t temp_64 = 0;
+        uint32_t temp_32 = 0;
 
         for (size_t i = 0; i < bigger_len; i++)
         {
-            temp_16 = temp_8;
+            temp_64 = temp_32;
             if (i < a_len)
             {
-                temp_16 += res[i];
+                temp_64 += res[i];
             }
             else
             {
@@ -290,14 +292,14 @@ namespace MBN
 
             if (i < b_len)
             {
-                temp_16 += b[i];
+                temp_64 += b[i];
             }
 
-            res[i] = temp_16 & _8_bit_mask;
-            temp_8 = temp_16 >> 8;
+            res[i] = temp_64 & _32_bit_mask;
+            temp_32 = temp_64 >> 32;
         }
 
-        if (temp_8)
+        if (temp_32)
         {
             res.append(ONE_U);
         }
@@ -306,35 +308,41 @@ namespace MBN
     // always assumes res > b.
     void Bigint::internal_sub(m_bytes &res, const m_bytes &b) const
     {
+        static const uint64_t CARRY_ONE = (0x1u << 32);
+
         size_t a_len = res.getSize();
         size_t b_len = b.getSize();
 
-        uint16_t temp_16 = 0;
-        uint8_t temp_8, next_carry = 0, curr_carry = 0;
+        uint64_t temp_64 = 0;
+        uint32_t temp_32, next_carry = 0, curr_carry = 0;
 
         for (size_t i = 0; i < a_len; i++)
         {
             curr_carry = next_carry;
             next_carry = 0;
-            temp_16 = res[i];
-            if (curr_carry > temp_16)
+            temp_64 = res[i];
+            if (curr_carry > temp_64)
             {
-                temp_16 += 0x100u;
+                // temp_64 += 0x100u;
+                temp_64 += CARRY_ONE;
+
                 next_carry++;
             }
-            temp_16 -= curr_carry;
+            temp_64 -= curr_carry;
 
             if (i < b_len)
             {
-                temp_8 = b[i];
-                if (temp_8 > temp_16)
+                temp_32 = b[i];
+                if (temp_32 > temp_64)
                 {
-                    temp_16 += 0x100u;
+                    // temp_64 += 0x100u;
+                    temp_64 += CARRY_ONE;
+
                     next_carry++;
                 }
-                temp_16 -= temp_8;
+                temp_64 -= temp_32;
             }
-            res[i] = temp_16;
+            res[i] = temp_64;
         }
         trim_bytes(res);
     }
@@ -421,8 +429,8 @@ namespace MBN
 
     void Bigint::internal_shift_helper(m_bytes &res, uint64_t shift, bool left_shift) const
     {
-        size_t full_shifts = shift / 8;
-        size_t partial_shift = shift % 8;
+        size_t full_shifts = shift / 32;
+        size_t partial_shift = shift % 32;
 
         if (left_shift)
         {
@@ -462,54 +470,57 @@ namespace MBN
 
     void Bigint::internal_left_shift(m_bytes &res, uint64_t shift) const
     {
-        if (shift > 8)
+        if (shift > 32)
         {
             throw std::invalid_argument("internal_left_shift been called with shift value greater than 8.");
         }
         else if (shift)
         {
-            uint16_t temp_16 = 0;
-            uint8_t curr_byte, temp_8 = 0;
+            uint64_t temp_64 = 0;
+            uint32_t curr_byte, temp_32 = 0;
             size_t len = res.getSize();
 
             for (size_t i = 0; i < len; i++)
             {
-                temp_16 = res[i];
-                temp_16 = temp_16 << shift;
-                curr_byte = temp_16 & _8_bit_mask;
-                curr_byte = curr_byte | temp_8;
+                temp_64 = res[i];
+                temp_64 = temp_64 << shift;
+                curr_byte = temp_64 & _32_bit_mask;
+                curr_byte = curr_byte | temp_32;
                 res[i] = curr_byte;
-                temp_8 = temp_16 >> 8;
+                temp_32 = temp_64 >> 32;
             }
 
-            if (temp_8)
+            if (temp_32)
             {
-                res.append(temp_8);
+                res.append(temp_32);
             }
         }
     }
 
     void Bigint::internal_right_shift(m_bytes &res, uint64_t shift) const
     {
-        if (shift > 8)
+        if (shift > 32)
         {
             throw std::invalid_argument("internal_right_shift been called with shift value greater than 8.");
         }
         else if (shift)
         {
-            uint16_t temp_16 = 0;
-            uint8_t curr_byte, temp_8 = 0;
+            uint64_t temp_64 = 0;
+            uint32_t curr_byte, temp_32 = 0;
             size_t len = res.getSize();
             shift = 8 - shift;
 
             for (std::int64_t i = len - 1; i >= 0; i--)
             {
-                temp_16 = res[i];
-                temp_16 = temp_16 << shift;
-                curr_byte = (temp_16 & 0xff00u) >> 8;
-                curr_byte = curr_byte | temp_8;
+                temp_64 = res[i];
+                temp_64 = temp_64 << shift;
+
+                // curr_byte = (temp_16 & 0xff00u) >> 8;
+                curr_byte = temp_64 >> 32;
+
+                curr_byte = curr_byte | temp_32;
                 res[i] = curr_byte;
-                temp_8 = temp_16 & 0xffu;
+                temp_32 = temp_64 & _32_bit_mask;
             }
             trim_bytes(res);
         }
