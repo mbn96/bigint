@@ -472,7 +472,7 @@ namespace MBN
     {
         if (shift > 32)
         {
-            throw std::invalid_argument("internal_left_shift been called with shift value greater than 8.");
+            throw std::invalid_argument("internal_left_shift been called with shift value greater than 32.");
         }
         else if (shift)
         {
@@ -501,7 +501,7 @@ namespace MBN
     {
         if (shift > 32)
         {
-            throw std::invalid_argument("internal_right_shift been called with shift value greater than 8.");
+            throw std::invalid_argument("internal_right_shift been called with shift value greater than 32.");
         }
         else if (shift)
         {
@@ -943,8 +943,8 @@ namespace MBN
 
     std::ostream &operator<<(std::ostream &strm, const Bigint &num)
     {
-        // strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 8) << num.bytes;
-        strm << "Bits count: " << (num.bytes.getSize() * 32) << ' ' << num.to_string();
+        // strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 32) << num.bytes;
+        strm << "Bits count: " << (num.bytes.getSize() * 32) << ' ' << num.to__decimal_string();
 
         return strm;
     }
@@ -973,6 +973,45 @@ namespace MBN
         {
             result = '-' + result;
         }
+        return result;
+    }
+
+    string Bigint::to__decimal_string() const
+    {
+        using std::to_string;
+        string result;
+        uint32_t current;
+        m_bytes rem(bytes);
+        m_bytes res;
+
+        if (sign)
+        {
+            result += '-';
+        }
+
+        static const Bigint BILLION(1000000000, 0);
+
+        do
+        {
+            internal_div(rem, BILLION.bytes, res, true);
+            current = rem[0];
+            swap(rem, res);
+            // rem = res;
+            res.clear();
+            for (int i = 0; i < 9; i++)
+            {
+                // sb.append((char)('0' + current % 10));
+                result += (char)(48 + (current % 10));
+                current /= 10;
+                if (current == 0 && is_zero(rem))
+                {
+                    break;
+                }
+            }
+
+        } while (!is_zero(rem));
+
+        std::reverse(result.begin(), result.end());
         return result;
     }
 

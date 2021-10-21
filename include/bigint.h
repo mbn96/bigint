@@ -90,6 +90,7 @@ namespace MBN
         bool operator<=(const Bigint &other) const;
 
         string to_string() const;
+        string to__decimal_string() const;
     };
 
 } // namespace MBN
