@@ -220,6 +220,17 @@ namespace MBN
         return get_lsb(bytes);
     }
 
+    bool Bigint::is_pow_of_2(const m_bytes &bs) const
+    {
+        size_t lsb = get_lsByte(bs), msb = get_msb(bs);
+        return (lsb == msb) && bs[lsb];
+    }
+
+    bool Bigint::is_pow_of_2() const
+    {
+        return is_pow_of_2(bytes);
+    }
+
     void Bigint::internal_or(m_bytes &res, const m_bytes &b) const
     {
         size_t a_len = res.getSize();

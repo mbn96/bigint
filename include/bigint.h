@@ -51,6 +51,8 @@ namespace MBN
 
         void internal_div_alter(m_bytes a, m_bytes b, m_bytes &result) const;
 
+        bool is_pow_of_2(const m_bytes &bs) const;
+
         Bigint(const m_bytes &bs, uint8_t sign);
 
     public:
@@ -67,6 +69,8 @@ namespace MBN
 
         size_t get_msb() const;
         size_t get_lsb() const;
+        bool is_pow_of_2() const;
+
 
         Bigint &operator=(Bigint other);
 
