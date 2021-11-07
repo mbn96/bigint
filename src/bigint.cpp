@@ -1041,10 +1041,7 @@ namespace MBN
         m_bytes rem(bytes);
         m_bytes res;
 
-        if (sign)
-        {
-            result += '-';
-        }
+       
 
         static const Bigint BILLION(1000000000, 0);
 
@@ -1067,7 +1064,10 @@ namespace MBN
             }
 
         } while (!is_zero(rem));
-
+         if (sign)
+        {
+            result += '-';
+        }
         std::reverse(result.begin(), result.end());
         return result;
     }
