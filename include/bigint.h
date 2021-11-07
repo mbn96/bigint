@@ -19,7 +19,7 @@ namespace MBN
     {
     private:
         m_bytes bytes;
-        uint8_t sign;
+        uint8_t sign = 0;
 
         int compare(const Bigint &other) const;
         int compare_unsigned(const Bigint &other) const;
@@ -54,12 +54,13 @@ namespace MBN
         bool is_pow_of_2(const m_bytes &bs) const;
 
         Bigint(const m_bytes &bs, uint8_t sign);
+        void internal_string_constr(const char *num, uint64_t n);
 
     public:
         Bigint(std::int64_t num);
         Bigint(uint64_t num, bool sign);
         Bigint(const string &num);
-        Bigint(const char *num);
+        Bigint(const char *num, uint64_t n);
         Bigint(const Bigint &other);
         Bigint(Bigint &&other);
         ~Bigint();
@@ -70,7 +71,6 @@ namespace MBN
         size_t get_msb() const;
         size_t get_lsb() const;
         bool is_pow_of_2() const;
-
 
         Bigint &operator=(Bigint other);
 

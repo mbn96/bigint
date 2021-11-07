@@ -222,8 +222,8 @@ namespace MBN
 
     bool Bigint::is_pow_of_2(const m_bytes &bs) const
     {
-        size_t lsb = get_lsByte(bs), msb = get_msb(bs);
-        return (lsb == msb) && bs[lsb];
+        size_t lsb = get_lsb(bs), msb = get_msb(bs);
+        return (lsb == msb) && lsb;
     }
 
     bool Bigint::is_pow_of_2() const
@@ -868,6 +868,52 @@ namespace MBN
 
     Bigint::Bigint(const m_bytes &bs, uint8_t sign) : bytes(bs), sign(sign) {}
 
+    Bigint::Bigint(const string &num)
+    {
+        internal_string_constr(num.c_str(), num.length());
+    }
+
+    Bigint::Bigint(const char *num, uint64_t n)
+    {
+        internal_string_constr(num, n);
+    }
+
+    void Bigint::internal_string_constr(const char *num, uint64_t n)
+    {
+        // logic to convert base-10 string integer to binary bigInt
+        if (*num == '-')
+        {
+            sign = 1;
+            num++;
+        }
+        bytes.append(0);
+        m_bytes temp(1, 0);
+
+        for (; *(num + 1); num++)
+        {
+            if (*num >= '0' && *num <= '9')
+            {
+                temp[0] = (*num) - 48;
+                internal_add(bytes, temp);
+                internal_multi(bytes, 10);
+            }
+            else
+            {
+                throw std::invalid_argument("Only chars(0-9,-) are allowed.");
+            }
+        }
+
+        if (*num >= '0' && *num <= '9')
+        {
+            temp[0] = (*num) - 48;
+            internal_add(bytes, temp);
+        }
+        else
+        {
+            throw std::invalid_argument("Only chars(0-9,-) are allowed.");
+        }
+    }
+
     Bigint::~Bigint()
     {
         // std::cout << "Here in custom destructor Bigint.\n";
@@ -955,7 +1001,7 @@ namespace MBN
     std::ostream &operator<<(std::ostream &strm, const Bigint &num)
     {
         // strm << (num.sign ? " - " : "") << "Bits count: " << (num.bytes.getSize() * 32) << num.bytes;
-        strm << "Bits count: " << (num.bytes.getSize() * 32) << ' ' << num.to__decimal_string();
+        strm << "Bits count: " << (/*num.bytes.getSize() * 32*/ num.get_msb()) << ' ' << num.to__decimal_string();
 
         return strm;
     }

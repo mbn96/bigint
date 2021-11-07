@@ -66,11 +66,16 @@ int main(int argc, char const *argv[])
 
     // cout << (a > b) << endl;
 
-    Bigint fac_num(500, 0);
-    Bigint fact(1, 0);
-    fact = factor(fac_num);
+    Bigint str_test("123456789123456789123456789123456789123456789123456789");
+    // 123456789123456789123456789123456789123456789123456789
+    // 123456789123456789123456789123456789123456789123456789
+    cout << str_test << endl;
 
-    cout << fact << endl;
+    // Bigint fac_num(500, 0);
+    // Bigint fact(1, 0);
+    // fact = factor(fac_num);
+
+    // cout << fact << endl;
 
     // auto list = get_ints();
 
