@@ -24,39 +24,64 @@ Bigint factor(Bigint num)
     {
         return one;
     }
-
-    return num * factor(num - one);
+    Bigint f = factor(num - one);
+    return num * f;
 }
 
 int main(int argc, char const *argv[])
 {
-    cout << "hey" << endl;
+    // cout << "hey" << endl;
 
-    Bigint a(455, false);
-    Bigint b(121, 0);
-    Bigint c = a + b;
-    Bigint d = a * b;
-    Bigint e = a - b;
-    Bigint f = b - a;
-    Bigint g = a / b;
-    Bigint h = a % b;
+    // Bigint a(455, false);
+    // Bigint b(121, 0);
+    // Bigint b1(48, 0);
+    // Bigint b2(3, 0);
+    // Bigint b3(793, 0);
 
-    cout << a << endl;
-    cout << b << endl;
-    cout << c << endl;
-    cout << d << endl;
-    cout << e << endl;
-    cout << f << endl;
-    cout << g << endl;
-    cout << h << endl;
+    // Bigint c = a / b;
+    // Bigint d = a / b1;
+    // Bigint e = a / b2;
+    // Bigint f = a / b3;
+    // Bigint g = b1 / b2;
+    // Bigint h = b3 / b1;
 
-    cout << (a > b) << endl;
+    // Bigint c = a + b;
+    // Bigint d = a * b;
+    // d = d * c * a;
+    // Bigint e = a - b;
+    // Bigint f = b - a;
+    // Bigint g = a / b;
+    // Bigint h = a % b;
 
-    Bigint fac_num(120, 0);
-    Bigint fact(1, 0);
-    fact = factor(fac_num);
+    // cout << a << endl;
+    // cout << b << endl;
+    // cout << b1 << endl;
+    // cout << b2 << endl;
+    // cout << c << endl;
+    // cout << d << endl;
+    // cout << e << endl;
+    // cout << f << endl;
+    // cout << g << endl;
+    // cout << h << endl;
 
-    cout << fact << endl;
+    // cout << (a > b) << endl;
+
+    Bigint str_test("123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789");
+    // 123456789123456789123456789123456789123456789123456789
+    // 123456789123456789123456789123456789123456789123456789
+
+    
+
+    
+
+    
+    cout << str_test << endl;
+
+    // Bigint fac_num(500, 0);
+    // Bigint fact(1, 0);
+    // fact = factor(fac_num);
+
+    // cout << fact << endl;
 
     // auto list = get_ints();
 
