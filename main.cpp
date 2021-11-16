@@ -74,14 +74,6 @@ int main(int argc, char const *argv[])
     // 123456789123456789123456789123456789123456789123456789
 
     
-
-    
-
-    
-
-    
-
-    
     cout << str_test << endl;
 
     // Bigint fac_num(500, 0);
