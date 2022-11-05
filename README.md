@@ -1,2 +1,2 @@
 # bigint
-A Simple Educational Big(ararbitrary length) integer library written in cpp.
+A Simple Educational Big(arbitrary length) integer library written in cpp.
